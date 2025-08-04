@@ -1,12 +1,14 @@
 package org.cft;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -14,22 +16,24 @@ import java.util.concurrent.Callable;
 @Command(name = "filter",
         mixinStandardHelpOptions = true,
         version = "1.0",
-        description = "Утилита для фильтрации содержимого файлов по типам данных")
+        description = "Utility for filtering file contents by data type")
 public class FilterApp implements Callable<Integer> {
 
-    @Parameters(description = "Входные файлы для обработки")
+    private static final Logger logger = LoggerFactory.getLogger(FilterApp.class);
+
+    @Parameters(description = "Input files for processing")
     private List<String> inputFiles;
 
     @Option(names = {"-o", "--output"},
-            description = "Путь для выходных файлов (по умолчанию: текущая папка)")
+            description = "Path for output data (default: current directory)")
     private String outputPath = ".";
 
     @Option(names = {"-p", "--prefix"},
-            description = "Префикс имен выходных файлов")
+            description = "Prefix name for output files")
     private String prefix = "";
 
     @Option(names = {"-a", "--append"},
-            description = "Режим добавления в существующие файлы")
+            description = "Append mode")
     private boolean appendMode = false;
 
     @Option(names = {"-s", "--short"},
@@ -41,48 +45,50 @@ public class FilterApp implements Callable<Integer> {
     private boolean fullStats = false;
 
     @Override
-    public Integer call() throws Exception {
-        try {
-            // Проверяем входные параметры
-            if (inputFiles == null || inputFiles.isEmpty()) {
-                System.err.println("Error: No input files specified");
-                return 1;
-            }
+    public Integer call() {
+        if (inputFiles == null || inputFiles.isEmpty()) {
+            logger.error("No input files specified");
+            System.err.println("Error: No input files specified");
+            return 1;
+        }
 
-            // TO DO: Add try with resources
-            FileFilter filter = new FileFilter();
+        try (FileFilter filter = new FileFilter()) {
             filter.setOutputPath(Paths.get(outputPath));
             filter.setPrefix(prefix);
             filter.setAppendMode(appendMode);
 
-            // Обрабатываем файлы
             for (String inputFile : inputFiles) {
                 try {
+                    logger.info("Starting processing of {}", inputFile);
                     filter.processFile(Paths.get(inputFile));
                 } catch (IOException e) {
-                    System.err.println("Error while processing file:" + inputFile + ": " + e.getMessage());
-                    // Продолжаем обработку других файлов
+                    logger.warn("Error processing file {}: {}", inputFile, e.getMessage());
+                    System.err.println("Error processing file " + inputFile + ": " + e.getMessage());
                 }
             }
 
-            // Выводим статистику
             Statistics stats = filter.getStatistics();
             if (shortStats) {
+                logger.info("Printing short statistics");
                 stats.printShortStatistics();
             } else if (fullStats) {
+                logger.info("Printing full statistics");
                 stats.printFullStatistics();
             }
-            filter.close();
-            return 0;
 
+            return 0;
         } catch (Exception e) {
-            System.err.println("Critical Error" + e.getMessage());
+            logger.error("Critical error: {}", e.getMessage(), e);
+            System.err.println("Critical error: " + e.getMessage());
             return 1;
         }
     }
 
+
     public static void main(String[] args) {
+        logger.info("CLI started with args {}", (Object) args);
         int exitCode = new CommandLine(new FilterApp()).execute(args);
+        logger.info("CLI exited with code {}", exitCode);
         System.exit(exitCode);
     }
 }

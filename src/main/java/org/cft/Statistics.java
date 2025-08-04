@@ -2,24 +2,20 @@ package org.cft;
 
 public class Statistics {
 
-    // Счетчики элементов
     private long integerCount = 0;
     private long floatCount = 0;
     private long stringCount = 0;
 
-    // Статистика для целых чисел
     private long integerMin = Long.MAX_VALUE;
     private long integerMax = Long.MIN_VALUE;
     private long integerSum = 0;
 
-    // Статистика для вещественных чисел
     private double floatMin = Double.MAX_VALUE;
     private double floatMax = -Double.MAX_VALUE;
     private double floatSum = 0.0;
 
-    // Статистика для строк
     private int minStringLength = Integer.MAX_VALUE;
-    private int maxStringLength = Integer.MIN_VALUE;
+    private int maxStringLength = 0;
 
     public void addInteger(long value) {
         integerCount++;
@@ -100,7 +96,6 @@ public class Statistics {
     }
 
 
-    // Геттеры для проверки наличия данных
     public long getIntegerCount() { return integerCount; }
     public long getFloatCount() { return floatCount; }
     public long getStringCount() { return stringCount; }
