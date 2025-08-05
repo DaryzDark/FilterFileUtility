@@ -13,11 +13,13 @@ import static org.assertj.core.api.Assertions.*;
 
 class FileFilterTest {
 
+    @TempDir
+    Path tempDir;
 
     private FileFilter filter;
 
     @BeforeEach
-    void setUp(@TempDir Path tempDir) {
+    void setUp() {
         filter = new FileFilter();
         filter.setOutputPath(tempDir);
         filter.setPrefix("");
@@ -25,7 +27,7 @@ class FileFilterTest {
     }
 
     @Test
-    void whenSingleIntegerLine_thenWritesToIntegersFile(@TempDir Path tempDir) throws IOException {
+    void whenSingleIntegerLine_thenWritesToIntegersFile() throws IOException {
         Path input = tempDir.resolve("in.txt");
         Files.writeString(input, "42\n");
         filter.processFile(input);
@@ -43,7 +45,7 @@ class FileFilterTest {
     }
 
     @Test
-    void whenMixedLines_thenCategorizesCorrectly(@TempDir Path tempDir) throws IOException {
+    void whenMixedLines_thenCategorizesCorrectly() throws IOException {
         Path input = tempDir.resolve("mixed.txt");
         String content = """
             hello
@@ -69,7 +71,7 @@ class FileFilterTest {
     }
 
     @Test
-    void whenAppendMode_thenFilesAreAppended(@TempDir Path tempDir) throws IOException {
+    void whenAppendMode_thenFilesAreAppended() throws IOException {
         filter.setAppendMode(true);
         Path in1 = tempDir.resolve("a.txt");
         Path in2 = tempDir.resolve("b.txt");

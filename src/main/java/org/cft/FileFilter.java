@@ -1,15 +1,10 @@
 package org.cft;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.nio.file.*;
 import java.util.regex.Pattern;
 
 public class FileFilter implements AutoCloseable {
-
-    private static final Logger logger = LoggerFactory.getLogger(FileFilter.class);
 
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^[+-]?\\d+$");
     private static final Pattern FLOAT_PATTERN = Pattern.compile("^[+-]?(?:\\d*\\.\\d+|\\d+\\.\\d*)(?:[eE][+-]?\\d+)?$");
@@ -41,16 +36,13 @@ public class FileFilter implements AutoCloseable {
 
     public void processFile(Path inputFile) throws IOException {
         if (!Files.exists(inputFile)) {
-            logger.error("File not found: {}", inputFile);
             throw new FileNotFoundException("File not found: " + inputFile);
         }
 
         if (!Files.isReadable(inputFile)) {
-            logger.error("File is not available for read: {}", inputFile);
             throw new IOException("File is not available for read: " + inputFile);
         }
 
-        logger.info("Processing file {}", inputFile);
         try (BufferedReader reader = Files.newBufferedReader(inputFile)) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -112,7 +104,6 @@ public class FileFilter implements AutoCloseable {
             writer.write(content);
             writer.newLine();
             writer.flush();
-            logger.debug("Wrote '{}' to {}", content, type);
         }
     }
 
@@ -158,11 +149,9 @@ public class FileFilter implements AutoCloseable {
     @Override
     public void close() throws IOException {
         IOException exception = null;
-        logger.info("Closing writers");
         if (integerWriter != null) {
             try {
                 integerWriter.close();
-                logger.debug("Closed integer writer");
             } catch (IOException e) {
                 exception = e;
             }
@@ -170,7 +159,6 @@ public class FileFilter implements AutoCloseable {
         if (floatWriter != null) {
             try {
                 floatWriter.close();
-                logger.debug("Closed float writer");
             } catch (IOException e) {
                 if (exception == null) {
                     exception = e;
@@ -182,7 +170,6 @@ public class FileFilter implements AutoCloseable {
         if (stringWriter != null) {
             try {
                 stringWriter.close();
-                logger.debug("Closed string writer");
             } catch (IOException e) {
                 if (exception == null) {
                     exception = e;

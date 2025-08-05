@@ -29,7 +29,6 @@ class FilterAppTest {
                 .execute(in.toString(), "-o", dir.toString(), "-s");
         assertThat(code).isZero();
 
-        // Check files
         assertThat(Files.readAllLines(dir.resolve("strings.txt"))).containsExactly("foo");
         assertThat(Files.readAllLines(dir.resolve("integers.txt"))).containsExactly("100");
         assertThat(Files.readAllLines(dir.resolve("floats.txt"))).containsExactly("3.14");
