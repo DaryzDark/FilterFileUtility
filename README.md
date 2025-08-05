@@ -22,7 +22,7 @@ FileFilterUtility — это консольная утилита на Java, ко
 
 ## Сборка проекта и запуск 
 
-Можно скачать ```uberjar``` со всеми зависимостями со страницы [Releases](https://github.com/danielesegato/FileFilterUtility/releases).
+Можно скачать ```uberjar``` со всеми зависимостями со страницы [Releases](https://github.com/DaryzDark/FilterFileUtility/releases).
 Альтернативно можно собрать проект из исходников
 
 ### С использованием Gradle Wrapper
