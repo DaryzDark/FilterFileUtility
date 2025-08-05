@@ -13,12 +13,12 @@ FileFilterUtility — это консольная утилита на Java, ко
 
 ## Зависимости
 
-| Библиотека | Версия | Назначение | Ссылка |
-|------------|--|------------|--------|
-| picocli | 4.7.7 | Обработка аргументов командной строки | [Maven Central](https://mvnrepository.com/artifact/info.picocli/picocli/4.7.7) |
-| JUnit 5 | 5.10.0 | Тестирование | [Maven Central](https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter/5.10.0) |
-| AssertJ | 4.0.0-M1 | Assertions для тестов | [Maven Central](https://mvnrepository.com/artifact/org.assertj/assertj-core/4.0.0-M1) |
-| Shadow | 9.0.0-rc3 | Создание fat JAR | [GitHub](https://github.com/johnrengelman/shadow) |
+| Библиотеки и плагины | Версия | Назначение | Ссылка |
+|----------------------|--|------------|--------|
+| picocli              | 4.7.7 | Обработка аргументов командной строки | [Maven Central](https://mvnrepository.com/artifact/info.picocli/picocli/4.7.7) |
+| JUnit 5              | 5.10.0 | Тестирование | [Maven Central](https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter/5.10.0) |
+| AssertJ              | 4.0.0-M1 | Assertions для тестов | [Maven Central](https://mvnrepository.com/artifact/org.assertj/assertj-core/4.0.0-M1) |
+| Shadow               | 9.0.0-rc3 | Создание fat JAR | [GitHub](https://github.com/johnrengelman/shadow) |
 
 ## Сборка проекта и запуск 
 
