@@ -32,7 +32,7 @@ FileFilterUtility — это консольная утилита на Java, ко
 ./gradlew build
 
 # Windows
-gradlew.bat build
+.\gradlew.bat build
 ```
 
 
