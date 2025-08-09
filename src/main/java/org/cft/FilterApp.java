@@ -7,6 +7,8 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -47,10 +49,7 @@ public class FilterApp implements Callable<Integer> {
             return 1;
         }
 
-        try (FileFilter filter = new FileFilter()) {
-            filter.setOutputPath(Paths.get(outputPath));
-            filter.setPrefix(prefix);
-            filter.setAppendMode(appendMode);
+        try (FileFilter filter = new FileFilter(Path.of(outputPath), prefix, appendMode)) {
 
             for (String inputFile : inputFiles) {
                 try {
@@ -61,16 +60,25 @@ public class FilterApp implements Callable<Integer> {
             }
 
             Statistics stats = filter.getStatistics();
-            if (shortStats) {
-                stats.printShortStatistics();
+            if (shortStats && fullStats) {
+                System.err.println("Warning: both -s (short) and -f (full) specified; defaulting to full statistics.");
+                stats.printFullStatistics();
             } else if (fullStats) {
                 stats.printFullStatistics();
+            } else if (shortStats) {
+                stats.printShortStatistics();
             }
 
             return 0;
+        } catch (InvalidPathException e) {
+            System.err.println("Invalid output path: " + outputPath);
+            return 2;
+        } catch (IOException e) {
+            System.err.println("Critical I/O error: " + e.getMessage());
+            return 3;
         } catch (Exception e) {
-            System.err.println("Critical error: " + e.getMessage());
-            return 1;
+            System.err.println("Unexpected error: " + e.getMessage());
+            return 4;
         }
     }
 

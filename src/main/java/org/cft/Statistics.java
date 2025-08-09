@@ -99,4 +99,6 @@ public class Statistics {
     public long getIntegerCount() { return integerCount; }
     public long getFloatCount() { return floatCount; }
     public long getStringCount() { return stringCount; }
+    public long getIntegerMin() { return integerMin; }
+    public long getIntegerMax() { return integerMax; }
 }
