@@ -40,15 +40,15 @@ public class FileFilter implements AutoCloseable {
         try {
             switch (type) {
                 case INTEGER -> {
-                    statistics.addInteger(Long.parseLong(line));
+                    statistics.add(DataType.INTEGER, line);
                     writer.writeToFile(line, DataType.INTEGER);
                 }
                 case FLOAT -> {
-                    statistics.addFloat(Double.parseDouble(line));
+                    statistics.add(DataType.FLOAT, line);
                     writer.writeToFile(line, DataType.FLOAT);
                 }
                 case STRING -> {
-                    statistics.addString(line);
+                    statistics.add(DataType.STRING, line);
                     writer.writeToFile(line, DataType.STRING);
                 }
             }

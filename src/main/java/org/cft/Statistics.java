@@ -1,104 +1,137 @@
 package org.cft;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public class Statistics {
+    private final Map<DataType, Stat> stats = new EnumMap<>(DataType.class);
 
-    private long integerCount = 0;
-    private long floatCount = 0;
-    private long stringCount = 0;
-
-    private long integerMin = Long.MAX_VALUE;
-    private long integerMax = Long.MIN_VALUE;
-    private long integerSum = 0;
-
-    private double floatMin = Double.MAX_VALUE;
-    private double floatMax = -Double.MAX_VALUE;
-    private double floatSum = 0.0;
-
-    private int minStringLength = Integer.MAX_VALUE;
-    private int maxStringLength = 0;
-
-    public void addInteger(long value) {
-        integerCount++;
-        integerSum += value;
-
-        if (value < integerMin) {
-            integerMin = value;
-        }
-        if (value > integerMax) {
-            integerMax = value;
-        }
+    public Statistics() {
+        stats.put(DataType.INTEGER, new IntegerStat());
+        stats.put(DataType.FLOAT, new FloatStat());
+        stats.put(DataType.STRING, new StringStat());
     }
 
-    public void addFloat(double value) {
-        floatCount++;
-        floatSum += value;
-
-        if (value < floatMin) {
-            floatMin = value;
-        }
-        if (value > floatMax) {
-            floatMax = value;
-        }
-    }
-
-    public void addString(String value) {
-        stringCount++;
-        int length = value.length();
-
-        if (length < minStringLength) {
-            minStringLength = length;
-        }
-        if (length > maxStringLength) {
-            maxStringLength = length;
-        }
+    public void add(DataType type, String rawValue) {
+        stats.get(type).add(rawValue);
     }
 
     public void printShortStatistics() {
         System.out.println("Short statistics:");
-        if (integerCount > 0) {
-            System.out.println("Integers: " + integerCount);
-        }
-        if (floatCount > 0) {
-            System.out.println("Floats: " + floatCount);
-        }
-        if (stringCount > 0) {
-            System.out.println("Strings: " + stringCount);
-        }
+        stats.forEach((type, stat) -> {
+            if (stat.getCount() > 0) {
+                System.out.printf("%s: %d%n", type, stat.getCount());
+            }
+        });
     }
 
     public void printFullStatistics() {
         System.out.println("Full statistics:");
+        stats.forEach((type, stat) -> {
+            if (stat.getCount() > 0) {
+                System.out.println(type + ":");
+                stat.printDetails();
+            }
+        });
+    }
 
-        if (integerCount > 0) {
-            System.out.println("Integers:");
-            System.out.println("  Count: " + integerCount);
-            System.out.println("  Minimum: " + integerMin);
-            System.out.println("  Maximum: " + integerMax);
-            System.out.println("  Sum: " + integerSum);
-            System.out.println("  Average: " + (double) integerSum / integerCount);
+    private interface Stat {
+        void add(String rawValue);
+        long getCount();
+        void printDetails();
+    }
+
+    private static class IntegerStat implements Stat {
+        private long count;
+        private long min = Long.MAX_VALUE;
+        private long max = Long.MIN_VALUE;
+        private long sum;
+
+        @Override
+        public void add(String rawValue) {
+            try {
+                addValue(Long.parseLong(rawValue));
+            } catch (NumberFormatException e) {
+                throw new NumberFormatException(rawValue);
+            }
         }
 
-        if (floatCount > 0) {
-            System.out.println("Floats:");
-            System.out.println("  Count: " + floatCount);
-            System.out.println("  Minimum: " + floatMin);
-            System.out.println("  Maximum: " + floatMax);
-            System.out.println("  Sum: " + floatSum);
-            System.out.println("  Average: " + floatSum / floatCount);
+        public void addValue(long value) {
+            if (value < min) min = value;
+            if (value > max) max = value;
+            sum += value;
+            count++;
         }
 
-        if (stringCount > 0) {
-            System.out.println("Strings:");
-            System.out.println("  Count: " + stringCount);
-            System.out.println("  Min length: " + minStringLength);
-            System.out.println("  Max length: " + maxStringLength);
+        @Override
+        public long getCount() { return count; }
+
+        @Override
+        public void printDetails() {
+            System.out.printf("  Count: %d%n", count);
+            System.out.printf("  Minimum: %d%n", min);
+            System.out.printf("  Maximum: %d%n", max);
+            System.out.printf("  Sum: %d%n", sum);
+            System.out.printf("  Average: %.5f%n", count > 0 ? (double) sum / count : 0);
         }
     }
 
+    private static class FloatStat implements Stat {
+        private long count;
+        private double min = Double.MAX_VALUE;
+        private double max = -Double.MAX_VALUE;
+        private double sum;
 
-    public long getIntegerCount() { return integerCount; }
-    public long getFloatCount() { return floatCount; }
-    public long getStringCount() { return stringCount; }
-    public long getIntegerMin() { return integerMin; }
-    public long getIntegerMax() { return integerMax; }
+        @Override
+        public void add(String rawValue) {
+            try {
+                addValue(Double.parseDouble(rawValue));
+            } catch (NumberFormatException e) {
+                throw new NumberFormatException(rawValue);
+            }
+        }
+
+        public void addValue(double value) {
+            if (value < min) min = value;
+            if (value > max) max = value;
+            sum += value;
+            count++;
+        }
+
+        @Override
+        public long getCount() { return count; }
+
+        @Override
+        public void printDetails() {
+            System.out.printf("  Count: %d%n", count);
+            System.out.printf("  Minimum: %s%n", min);
+            System.out.printf("  Maximum: %s%n", max);
+            System.out.printf("  Sum: %s%n", sum);
+            System.out.printf("  Average: %s%n", count > 0 ? sum / count : 0);
+        }
+    }
+
+    private static class StringStat implements Stat {
+        private long count;
+        private int minLength = Integer.MAX_VALUE;
+        private int maxLength = 0;
+
+        @Override
+        public void add(String rawValue) {
+            int len = rawValue.length();
+            if (len < minLength) minLength = len;
+            if (len > maxLength) maxLength = len;
+            count++;
+        }
+
+        @Override
+        public long getCount() { return count; }
+
+        @Override
+        public void printDetails() {
+            System.out.printf("  Count: %d%n", count);
+            System.out.printf("  Min length: %d%n", minLength);
+            System.out.printf("  Max length: %d%n", maxLength);
+        }
+    }
 }
