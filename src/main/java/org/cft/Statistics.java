@@ -49,11 +49,7 @@ public class Statistics {
 
         @Override
         public void add(String rawValue) {
-            try {
                 addValue(Long.parseLong(rawValue));
-            } catch (NumberFormatException e) {
-                throw new NumberFormatException(rawValue);
-            }
         }
 
         public void addValue(long value) {
@@ -84,11 +80,7 @@ public class Statistics {
 
         @Override
         public void add(String rawValue) {
-            try {
                 addValue(Double.parseDouble(rawValue));
-            } catch (NumberFormatException e) {
-                throw new NumberFormatException(rawValue);
-            }
         }
 
         public void addValue(double value) {
