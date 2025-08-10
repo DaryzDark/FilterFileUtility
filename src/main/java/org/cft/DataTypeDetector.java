@@ -17,24 +17,8 @@ public class DataTypeDetector {
 
 
     public static DataType determine(String line) {
-        if (INTEGER_PATTERN.matcher(line).matches()) {
-            try {
-                Long.parseLong(line);
-                return DataType.INTEGER;
-            } catch (NumberFormatException e) {
-                return DataType.STRING;
-            }
-        }
-
-        if (FLOAT_PATTERN.matcher(line).matches()) {
-            try {
-                Double.parseDouble(line);
-                return DataType.FLOAT;
-            } catch (NumberFormatException e) {
-                return DataType.STRING;
-            }
-        }
-
+        if (INTEGER_PATTERN.matcher(line).matches()) { return DataType.INTEGER;}
+        if (FLOAT_PATTERN.matcher(line).matches()) {return DataType.FLOAT;}
         return DataType.STRING;
     }
 

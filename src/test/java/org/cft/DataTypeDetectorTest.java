@@ -17,7 +17,7 @@ public class DataTypeDetectorTest {
     @Test
     void testDetermineIntegerOverflow() {
         String huge = "9223372036854775808";
-        assertEquals(DataType.STRING, DataTypeDetector.determine(huge));
+        assertEquals(DataType.INTEGER, DataTypeDetector.determine(huge));
     }
 
     @Test

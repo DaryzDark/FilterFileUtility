@@ -25,7 +25,7 @@ public class FileFilter implements AutoCloseable {
         try (BufferedReader reader = Files.newBufferedReader(inputFile, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                processLine(line.trim());
+                processLine(line.strip());
             }
         }
     }
