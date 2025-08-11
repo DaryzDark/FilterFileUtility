@@ -48,7 +48,7 @@ public class FloatProcessor implements LineProcessor {
 
     @Override
     public void printFullStatistics() {
-        System.out.println("INTEGER statistics:");
+        System.out.println("FLOAT statistics:");
         System.out.printf(" Count: %d%n", count);
         System.out.printf(" Min: %s%n", min);
         System.out.printf(" Max: %s%n", max);
