@@ -9,21 +9,28 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 
 public class FloatProcessor implements LineProcessor {
-    private final BufferedWriter writer;
+    private  BufferedWriter writer;
+    Path outputPath;
+    String prefix;
+    boolean appendMode;
     private long count = 0;
     private BigDecimal min = null;
     private BigDecimal max = null;
     private BigDecimal sum = BigDecimal.ZERO;
 
     public FloatProcessor(Path outputPath, String prefix, boolean appendMode) {
-        try {
+        this.outputPath = outputPath;
+        this.prefix = prefix;
+        this.appendMode = appendMode;
+    }
+
+    private void initWriter() throws IOException {
+        if (writer == null) {
             OpenOption[] opts = appendMode
                     ? new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND}
                     : new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING};
-            Path outputFile = outputPath.resolve(prefix + "floats.txt");
-            this.writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8, opts);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to create writer for floats file", e);
+            writer = Files.newBufferedWriter(outputPath.resolve(prefix + "floats.txt"),
+                    StandardCharsets.UTF_8, opts);
         }
     }
 
@@ -41,6 +48,7 @@ public class FloatProcessor implements LineProcessor {
     @Override
     public void process(String line) {
         try {
+            initWriter();
             BigDecimal value = new BigDecimal(line);
             if (min == null || value.compareTo(min) < 0) min = value;
             if (max == null || value.compareTo(max) > 0) max = value;
@@ -63,11 +71,19 @@ public class FloatProcessor implements LineProcessor {
     public void printFullStatistics() {
         System.out.println("FLOAT statistics:");
         System.out.printf(" Count: %d%n", count);
-        System.out.printf(" Min: %s%n", min);
-        System.out.printf(" Max: %s%n", max);
-        System.out.printf(" Sum: %s%n", sum);
+        System.out.printf(" Min: %s%n", formatDecimal(min));
+        System.out.printf(" Max: %s%n", formatDecimal(max));
+        System.out.printf(" Sum: %s%n", formatDecimal(sum));
         System.out.printf(" Average: %s%n",
-                count > 0 ? sum.divide(BigDecimal.valueOf(count), RoundingMode.HALF_UP) : "N/A");
+                count > 0 ? formatDecimal(sum.divide(BigDecimal.valueOf(count), RoundingMode.HALF_UP)) : "N/A");
+    }
+
+    private String formatDecimal(BigDecimal value) {
+        int STAT_SCALE = 5;
+        RoundingMode STAT_ROUNDING = RoundingMode.HALF_UP;
+
+        if (value == null) return "N/A";
+        return value.setScale(STAT_SCALE, STAT_ROUNDING).stripTrailingZeros().toPlainString();
     }
 
     @Override

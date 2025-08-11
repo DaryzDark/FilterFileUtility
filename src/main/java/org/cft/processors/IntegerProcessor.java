@@ -12,21 +12,28 @@ import java.nio.file.StandardOpenOption;
 
 public class IntegerProcessor implements LineProcessor {
 
-    private final BufferedWriter writer;
+    private  BufferedWriter writer;
+    Path outputPath;
+    String prefix;
+    boolean appendMode;
     private long count = 0;
     private BigInteger min = null;
     private BigInteger max = null;
     private BigInteger sum = BigInteger.ZERO;
 
     public IntegerProcessor(Path outputPath, String prefix, boolean appendMode) {
-        try {
+        this.outputPath = outputPath;
+        this.prefix = prefix;
+        this.appendMode = appendMode;
+    }
+
+    private void initWriter() throws IOException {
+        if (writer == null) {
             OpenOption[] opts = appendMode
                     ? new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND}
                     : new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING};
-            Path outputFile = outputPath.resolve(prefix + "integers.txt");
-            this.writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8, opts);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to create writer for integers file", e);
+            writer = Files.newBufferedWriter(outputPath.resolve(prefix + "integers.txt"),
+                    StandardCharsets.UTF_8, opts);
         }
     }
 
@@ -40,6 +47,7 @@ public class IntegerProcessor implements LineProcessor {
     @Override
     public void process(String line) {
         try {
+            initWriter();
             BigInteger value = new BigInteger(line);
             if (min == null || value.compareTo(min) < 0) min = value;
             if (max == null || value.compareTo(max) > 0) max = value;
