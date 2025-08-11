@@ -23,13 +23,13 @@ public class DataWriter implements AutoCloseable{
     }
 
 
-    public void writeToFile(String content, DataType type) throws IOException {
-        BufferedWriter w = writers.computeIfAbsent(type, this::getWriter);
+    public void writeToFile(String content, DataType type) {
         try {
+            BufferedWriter w = writers.computeIfAbsent(type, this::getWriter);
             w.write(content);
             w.newLine();
         } catch (IOException e) {
-            throw new IOException("Failed writing to " + type + " file: " + e.getMessage(), e);
+            throw new UncheckedIOException("Failed writing to " + type + " file: " + e.getMessage(), e);
         }
     }
 
@@ -41,7 +41,7 @@ public class DataWriter implements AutoCloseable{
             Path outputFile =  outputPath.resolve(prefix + type.name().toLowerCase() + "s.txt");
             return Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8, opts);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new UncheckedIOException("Failed to create writer for file: " + type, e);
         }
     }
 

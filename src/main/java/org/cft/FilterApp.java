@@ -59,14 +59,13 @@ public class FilterApp implements Callable<Integer> {
                 }
             }
 
-            Statistics stats = filter.getStatistics();
             if (shortStats && fullStats) {
                 System.err.println("Warning: both -s (short) and -f (full) specified; defaulting to full statistics.");
-                stats.printFullStatistics();
+                filter.printFullStatistics();
             } else if (fullStats) {
-                stats.printFullStatistics();
+                filter.printFullStatistics();
             } else if (shortStats) {
-                stats.printShortStatistics();
+                filter.printShortStatistics();
             }
 
             return 0;

@@ -1,16 +1,27 @@
 package org.cft;
 
+import org.cft.processors.FloatProcessor;
+import org.cft.processors.IntegerProcessor;
+import org.cft.processors.LineProcessor;
+import org.cft.processors.StringProcessor;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.List;
 
 public class FileFilter implements AutoCloseable {
 
-    private final Statistics statistics = new Statistics();
+    private final List<LineProcessor> processors;
     private final DataWriter writer;
 
     public FileFilter(Path outputPath, String prefix, boolean appendMode) {
         this.writer = new DataWriter(outputPath, prefix, appendMode);
+        this.processors = List.of(
+                new IntegerProcessor(writer),
+                new FloatProcessor(writer),
+                new StringProcessor(writer)
+        );
     }
 
     public void processFile(Path inputFile) throws IOException {
@@ -30,40 +41,30 @@ public class FileFilter implements AutoCloseable {
         }
     }
 
-    private void processLine(String line)  {
-        if (line.isEmpty()) {
-            return;
-        }
-
-        DataType type = DataTypeDetector.determine(line);
-
+    private void processLine(String line) {
+        if (line.isEmpty()) return;
         try {
-            switch (type) {
-                case INTEGER -> {
-                    statistics.add(DataType.INTEGER, line);
-                    writer.writeToFile(line, DataType.INTEGER);
-                }
-                case FLOAT -> {
-                    statistics.add(DataType.FLOAT, line);
-                    writer.writeToFile(line, DataType.FLOAT);
-                }
-                case STRING -> {
-                    statistics.add(DataType.STRING, line);
-                    writer.writeToFile(line, DataType.STRING);
+            for (LineProcessor p : processors) {
+                if (p.canProcess(line)) {
+                    p.process(line);
+                    break;
                 }
             }
-        } catch (NumberFormatException e) {
-            System.err.println("Parse error:" + e.getMessage());
         } catch (UncheckedIOException e) {
-            System.err.println("Write failure: " + e.getCause().getMessage());
-        } catch (Exception e) {
-            System.err.println("Unexpected error: " + e.getMessage());
+            System.err.println("I/O error processing line: '" + line + "'. Details: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.err.println("Processing error for line: '" + line + "'. Details: " + e.getMessage());
         }
     }
 
-    public Statistics getStatistics() {
-        return statistics;
+    public void printFullStatistics() {
+        processors.forEach(LineProcessor::printFullStatistics);
     }
+
+    public void printShortStatistics() {
+        processors.forEach(LineProcessor::printShortStatistics);
+    }
+
 
     @Override
     public void close() throws IOException { writer.close(); }
