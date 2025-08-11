@@ -1,20 +1,33 @@
 package org.cft.processors;
 
-import org.cft.DataType;
-import org.cft.DataWriter;
-
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class IntegerProcessor implements LineProcessor {
 
-    private final DataWriter writer;
+    private final BufferedWriter writer;
     private long count = 0;
     private BigInteger min = null;
     private BigInteger max = null;
     private BigInteger sum = BigInteger.ZERO;
 
-    public IntegerProcessor(DataWriter writer) {
-        this.writer = writer;
+    public IntegerProcessor(Path outputPath, String prefix, boolean appendMode) {
+        try {
+            OpenOption[] opts = appendMode
+                    ? new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND}
+                    : new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING};
+            Path outputFile = outputPath.resolve(prefix + "integers.txt");
+            this.writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8, opts);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to create writer for integers file", e);
+        }
     }
 
     @Override
@@ -26,18 +39,23 @@ public class IntegerProcessor implements LineProcessor {
 
     @Override
     public void process(String line) {
-        BigInteger value = new BigInteger(line);
+        try {
+            BigInteger value = new BigInteger(line);
+            if (min == null || value.compareTo(min) < 0) min = value;
+            if (max == null || value.compareTo(max) > 0) max = value;
+            sum = sum.add(value);
+            count++;
 
-        if (min == null || value.compareTo(min) < 0) min = value;
-        if (max == null || value.compareTo(max) > 0) max = value;
-        sum = sum.add(value);
-        count++;
-            writer.writeToFile(line, DataType.INTEGER);
+            writer.write(line);
+            writer.newLine();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed writing to integers file", e);
+        }
     }
 
     @Override
     public void printShortStatistics() {
-        System.out.printf("Integers: %d%n", count);
+        if (count > 0) System.out.printf("Integers: %d%n", count);
 
     }
 
@@ -50,5 +68,12 @@ public class IntegerProcessor implements LineProcessor {
         System.out.printf(" Sum: %s%n", sum);
         System.out.printf(" Average: %s%n",
                 count > 0 ? sum.divide(BigInteger.valueOf(count)) : "N/A");
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (writer != null) {
+            writer.close();
+        }
     }
 }

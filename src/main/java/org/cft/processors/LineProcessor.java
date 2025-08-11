@@ -1,6 +1,8 @@
 package org.cft.processors;
 
-public interface LineProcessor {
+import java.io.Closeable;
+
+public interface LineProcessor extends Closeable {
     boolean canProcess(String line);
     void process(String line);
     void printShortStatistics();

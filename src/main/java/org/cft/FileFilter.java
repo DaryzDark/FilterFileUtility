@@ -13,14 +13,12 @@ import java.util.List;
 public class FileFilter implements AutoCloseable {
 
     private final List<LineProcessor> processors;
-    private final DataWriter writer;
 
     public FileFilter(Path outputPath, String prefix, boolean appendMode) {
-        this.writer = new DataWriter(outputPath, prefix, appendMode);
         this.processors = List.of(
-                new IntegerProcessor(writer),
-                new FloatProcessor(writer),
-                new StringProcessor(writer)
+                new IntegerProcessor(outputPath, prefix, appendMode),
+                new FloatProcessor(outputPath, prefix, appendMode),
+                new StringProcessor(outputPath, prefix, appendMode)
         );
     }
 
@@ -67,5 +65,16 @@ public class FileFilter implements AutoCloseable {
 
 
     @Override
-    public void close() throws IOException { writer.close(); }
+    public void close() throws IOException {
+        IOException firstEx = null;
+        for (LineProcessor processor : processors) {
+            try {
+                processor.close();
+            } catch (IOException e) {
+                if (firstEx == null) firstEx = e;
+                else firstEx.addSuppressed(e);
+            }
+        }
+        if (firstEx != null) throw firstEx;
+    }
 }
